@@ -28,3 +28,8 @@ def test_parse_ignore_values_without_equals():
 def test_parse_strips_quotes():
     assert parse('    f     ;     FOO    =   "bar"   ; f ; baz ="raz"   ') == \
         {'FOO': 'bar', 'baz': 'raz'}
+
+
+def test_parse_skip_equals_inside_quotes():
+    assert parse('foo="bar=123456789&name=Magic+Mouse"') == \
+        {'foo': 'bar=123456789&name=Magic+Mouse'}
