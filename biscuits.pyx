@@ -57,7 +57,6 @@ cdef dict cparse(str input):
         unsigned int value_start = 0
         unsigned int value_end = 0
         bool needs_decoding = False
-        bool is_quote = False
         unsigned int length = len(input)
         unsigned int i = 0
         unsigned int previous = 0
@@ -70,28 +69,20 @@ cdef dict cparse(str input):
                 needs_decoding = True
             previous = i
             i += 1
-        elif char == '"':
-            is_quote = not is_quote
-            i += 1
-        elif not is_quote and not key_end and char == '=':
+        elif not key_end and char == '=':
             key_end = previous + 1
             i += 1
             while input[i] in (' ', '"'):
-                if input[i] == '"':
-                    is_quote = not is_quote
                 i += 1
             value_start = i
         elif char in (';', ','):
             if key_end != 0:  # We had an x=y thing.
                 extract(input, key_start, key_end, value_start, previous,
                         output, needs_decoding)
-            is_quote = False
             key_end = 0
             needs_decoding = False
             i += 1
             while input[i] in (' ', '"'):
-                if input[i] == '"':
-                    is_quote = not is_quote
                 i += 1
             key_start = i
         else:
