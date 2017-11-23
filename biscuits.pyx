@@ -25,8 +25,12 @@ cpdef str unquote(str input):
         if input[i] == '%':
             hex = input[i+1:i+3]
             if not len(hex) == 2:
-                return input
-            output.append(bytes.fromhex(hex).decode())
+                # Discard cookies with an invalid value.
+                return None
+            try:
+                output.append(bytes.fromhex(hex).decode())
+            except ValueError:
+                return None
             i += 2
         else:
             output.append(input[i])
@@ -39,7 +43,8 @@ cdef extract(str input, unsigned int key_start, unsigned int key_end,
              bool needs_decoding):
     key = input[key_start:key_end]
     value = input[value_start:value_end+1]
-    output[key] = unquote(value) if needs_decoding else value
+    if value is not None:
+        output[key] = unquote(value) if needs_decoding else value
 
 
 cdef dict cparse(str input):
@@ -63,7 +68,7 @@ cdef dict cparse(str input):
             previous = i
         elif char == '"':
             is_quote = not is_quote
-        elif not is_quote and char == '=':
+        elif not is_quote and not key_end and char == '=':
             key_end = previous + 1
             i += 1
             while input[i] in (' ', '"'):
