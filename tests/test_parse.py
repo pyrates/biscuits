@@ -13,7 +13,7 @@ from biscuits import parse
     ('key=value; other=value2', {'key': 'value', 'other': 'value2'}),
     ('FOO    =bar; baz  =raz', {'FOO': 'bar', 'baz': 'raz'}),
     ('FOO= bar; baz=   raz', {'FOO': 'bar', 'baz': 'raz'}),
-    ('FOO=bar   ; baz=raz  ', {'FOO': 'bar', 'baz': 'raz'}),
+    ('  FOO=bar   ; baz=raz  ', {'FOO': 'bar', 'baz': 'raz'}),
     ("  f   ;   FOO  =   bar;  ; f ; baz = raz", {'FOO': 'bar', 'baz': 'raz'}),
     ('FOO    =   "bar"   ; baz ="raz"  ', {'FOO': 'bar', 'baz': 'raz'}),
     ('foo="bar=123&name=Magic+Mouse"', {'foo': 'bar=123&name=Magic+Mouse'}),

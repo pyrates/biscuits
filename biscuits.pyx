@@ -21,7 +21,8 @@ cpdef str unquote(str input):
         list output = []
         unsigned int i = 0
         str hex
-    while i < len(input):
+        unsigned int length = len(input)
+    while i < length:
         if input[i] == '%':
             hex = input[i+1:i+3]
             if not len(hex) == 2:
@@ -38,11 +39,11 @@ cpdef str unquote(str input):
     return ''.join(output)
 
 
-cdef extract(str input, unsigned int key_start, unsigned int key_end,
+cdef void extract(str input, unsigned int key_start, unsigned int key_end,
              unsigned int value_start, unsigned int value_end, dict output,
              bool needs_decoding):
-    key = input[key_start:key_end]
-    value = input[value_start:value_end+1]
+    cdef str key = input[key_start:key_end]
+    cdef str value = input[value_start:value_end+1]
     if needs_decoding:
         value = unquote(value)
     if value is not None:
@@ -52,7 +53,7 @@ cdef extract(str input, unsigned int key_start, unsigned int key_end,
 cdef dict cparse(str input):
     cdef:
         dict output = {}
-        unsigned int key_start = 0
+        int key_start = -1
         unsigned int key_end = 0
         unsigned int value_start = 0
         unsigned int value_end = 0
@@ -68,6 +69,8 @@ cdef dict cparse(str input):
             if char == '%':
                 needs_decoding = True
             previous = i
+            if key_start == -1:
+                key_start = i
             i += 1
         elif not key_end and char == '=':
             key_end = previous + 1
