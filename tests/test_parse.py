@@ -15,9 +15,12 @@ from biscuits import parse
     ('FOO    =   "bar"   ; baz ="raz"  ', {'FOO': 'bar', 'baz': 'raz'}),
     ('foo="bar=123&name=Magic+Mouse"', {'foo': 'bar=123&name=Magic+Mouse'}),
     ('foo=bar=baz', {'foo': 'bar=baz'}),
+    ('a=Zm9vIGJhcg==', {'a': 'Zm9vIGJhcg=='}),
     ('foo=%20%22%2c%3b%2f', {'foo': ' ",;/'}),
     ('foo=%xx', {}),  # Invalid hex code.
     ('foo=%x', {}),  # Invalid hex code.
+    ('foo="?foo', {'foo': '?foo'}),
+    ("x=!#$&'()*+-./01", {'x': "!#$&'()*+-./01"}),
 ])
 def test_parse(input, expected):
     assert parse(input) == expected

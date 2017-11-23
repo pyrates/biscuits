@@ -65,7 +65,7 @@ cdef dict cparse(str input):
 
     while i < length:
         char = input[i]
-        if char not in (' ', '"', '=', ';', ','):
+        if char not in (' ', '"', ';', ',', '=') or (key_end and char == '='):
             if char == '%':
                 needs_decoding = True
             previous = i
