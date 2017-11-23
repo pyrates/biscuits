@@ -43,8 +43,10 @@ cdef extract(str input, unsigned int key_start, unsigned int key_end,
              bool needs_decoding):
     key = input[key_start:key_end]
     value = input[value_start:value_end+1]
+    if needs_decoding:
+        value = unquote(value)
     if value is not None:
-        output[key] = unquote(value) if needs_decoding else value
+        output[key] = value
 
 
 cdef dict cparse(str input):
@@ -60,14 +62,17 @@ cdef dict cparse(str input):
         unsigned int i = 0
         unsigned int previous = 0
 
+
     while i < length:
         char = input[i]
         if char not in (' ', '"', '=', ';', ','):
             if char == '%':
                 needs_decoding = True
             previous = i
+            i += 1
         elif char == '"':
             is_quote = not is_quote
+            i += 1
         elif not is_quote and not key_end and char == '=':
             key_end = previous + 1
             i += 1
@@ -89,7 +94,8 @@ cdef dict cparse(str input):
                     is_quote = not is_quote
                 i += 1
             key_start = i
-        i += 1
+        else:
+            i += 1
     if key_end != 0:
         extract(input, key_start, key_end, value_start, previous, output,
                 needs_decoding)
