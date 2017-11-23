@@ -5,11 +5,7 @@ from cpython.datetime cimport datetime
 
 from http.cookies import _weekdayname as DAYNAMES
 from http.cookies import _monthname as MONTHNAMES
-
-# from datetime import datetime
-# from cpython.list import PyList_Append
-# from urllib.parse import unquote
-# from http.cookies import _unquote
+from http.cookies import _quote as quote
 
 MAX_LENGTH = 4096
 
@@ -143,7 +139,7 @@ cdef class Cookie:
         self.expires = expires
 
     def __str__(self):
-        cdef str output = f'{self.name}={self.value}'
+        cdef str output = f'{self.name}={quote(self.value)}'
         if self.expires:
             output += f'; Expires={rfc822(self.expires)}'
         if self.max_age:

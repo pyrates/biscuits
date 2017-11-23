@@ -1,7 +1,7 @@
 from datetime import datetime
 
+import pytest
 from biscuits import Cookie
-
 
 FUTURE = datetime(2027, 9, 21, 11, 22)
 
@@ -50,3 +50,15 @@ def test_with_all_attributes():
     assert str(cookie) == ('key=value; Expires=Tue, 21 Sep 2027 11:22:00 GMT; '
                            'Max-Age=800; Domain=baz.org; Path=/bar; Secure; '
                            'HttpOnly')
+
+
+@pytest.mark.parametrize('value,expected', [
+    ('val"ue', 'key="val\\"ue"; Path=/'),
+    ('val ue', 'key="val ue"; Path=/'),
+    ('val=ue', 'key="val=ue"; Path=/'),
+    ('val+ue', 'key=val+ue; Path=/'),
+    ('val\\ue', 'key="val\\\\ue"; Path=/'),
+])
+def test_value_encoding(value, expected):
+    cookie = Cookie('key', value)
+    assert str(cookie) == expected
