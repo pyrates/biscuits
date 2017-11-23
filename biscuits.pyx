@@ -1,22 +1,49 @@
 # cython: language_level=3
 
 from cpython cimport bool
+from cpython.datetime cimport datetime
 
-SPACE = 0x20  # [space]
-SCOLON = 0x3B  # ;
-COMMA = 0x2C  # ,
-EQUALS = 0x3D  # =
-QUOTE = 0x22  # "
-PERCENT = 0x25  # %
-MAX_ASCII = 0x7F
+from http.cookies import _weekdayname as DAYNAMES
+from http.cookies import _monthname as MONTHNAMES
+
+# from datetime import datetime
+# from cpython.list import PyList_Append
+# from urllib.parse import unquote
+# from http.cookies import _unquote
+
+MAX_LENGTH = 4096
 
 
-cdef extract(str input, unsigned int key_start, unsigned int key_end, unsigned int value_start, unsigned int value_end, dict output):
-    # print('Extracting with', key_start, key_end, value_start, value_end)
+cpdef rfc822(d):
+    day = DAYNAMES[d.weekday()]
+    month = MONTHNAMES[d.month]
+    return d.strftime(f"{day}, %d {month} %Y %H:%M:%S GMT")
+
+
+cpdef str unquote(str input):
+    cdef:
+        list output = []
+        unsigned int i = 0
+        str hex
+    while i < len(input):
+        if input[i] == '%':
+            hex = input[i+1:i+3]
+            if not len(hex) == 2:
+                return input
+            output.append(bytes.fromhex(hex).decode())
+            i += 2
+        else:
+            output.append(input[i])
+        i += 1
+    return ''.join(output)
+
+
+cdef extract(str input, unsigned int key_start, unsigned int key_end,
+             unsigned int value_start, unsigned int value_end, dict output,
+             bool needs_decoding):
     key = input[key_start:key_end]
     value = input[value_start:value_end+1]
-    # TODO decode
-    output[key] = value
+    output[key] = unquote(value) if needs_decoding else value
 
 
 cdef dict cparse(str input):
@@ -26,18 +53,17 @@ cdef dict cparse(str input):
         unsigned int key_end = 0
         unsigned int value_start = 0
         unsigned int value_end = 0
-        bool need_decoding = False
+        bool needs_decoding = False
         bool is_quote = False
-        bool is_value = False
-        bool cont = False
         unsigned int length = len(input)
         unsigned int i = 0
-        unsigned int j = 0
         unsigned int previous = 0
 
     while i < length:
         char = input[i]
         if char not in (' ', '"', '=', ';', ','):
+            if char == '%':
+                needs_decoding = True
             previous = i
         elif char == '"':
             is_quote = not is_quote
@@ -51,9 +77,11 @@ cdef dict cparse(str input):
             value_start = i
         elif char in (';', ','):
             if key_end != 0:  # We had an x=y thing.
-                extract(input, key_start, key_end, value_start, previous, output)
+                extract(input, key_start, key_end, value_start, previous,
+                        output, needs_decoding)
             is_quote = False
             key_end = 0
+            needs_decoding = False
             i += 1
             while input[i] in (' ', '"'):
                 if input[i] == '"':
@@ -62,9 +90,70 @@ cdef dict cparse(str input):
             key_start = i
         i += 1
     if key_end != 0:
-        extract(input, key_start, key_end, value_start, previous, output)
+        extract(input, key_start, key_end, value_start, previous, output,
+                needs_decoding)
     return output
 
 
 def parse(str input):
     return cparse(input)
+
+
+
+cdef class Cookies(list):
+
+    def __getitem__(self, name):
+        for cookie in self:
+            if cookie.name == name:
+                return cookie
+        else:
+            raise KeyError(f'No cookie with name "{name}".')
+
+
+    def __delitem__(self, name):
+        for cookie in self:
+            if cookie.name == name:
+                self.remove(cookie)
+                break
+        else:
+            raise KeyError(f'No cookie with name "{name}".')
+
+
+cdef class Cookie:
+
+    cdef public:
+        str name
+        str value
+        str path
+        str domain
+        bool secure
+        bool httponly
+        unsigned int max_age
+        datetime expires
+
+    def __init__(self, name, value, path='/', domain=None, secure=False,
+                 httponly=False, max_age=0, expires=None):
+        self.name = name
+        self.value = value
+        self.path = path
+        self.domain = domain
+        self.secure = secure
+        self.httponly = httponly
+        self.max_age = max_age
+        self.expires = expires
+
+    def __str__(self):
+        cdef str output = f'{self.name}={self.value}'
+        if self.expires:
+            output += f'; Expires={rfc822(self.expires)}'
+        if self.max_age:
+            output += f'; Max-Age={self.max_age}'
+        if self.domain:
+            output += f'; Domain={self.domain}'
+        if self.path:
+            output += f'; Path={self.path}'
+        if self.secure:
+            output += f'; Secure'
+        if self.httponly:
+            output += f'; HttpOnly'
+        return output
