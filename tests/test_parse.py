@@ -7,6 +7,9 @@ from biscuits import parse
     ('key=value', {'key': 'value'}),
     ('key=123', {'key': '123'}),
     ('key=печенье', {'key': 'печенье'}),
+    ('key=ಠ_ಠ', {'key': 'ಠ_ಠ'}),
+    ('key=这事情得搞好啊', {'key': '这事情得搞好啊'}),
+    ('key=أم كلثوم', {'key': 'أم كلثوم'}),
     ('key=value; other=value2', {'key': 'value', 'other': 'value2'}),
     ('FOO    =bar; baz  =raz', {'FOO': 'bar', 'baz': 'raz'}),
     ('FOO= bar; baz=   raz', {'FOO': 'bar', 'baz': 'raz'}),
@@ -16,6 +19,7 @@ from biscuits import parse
     ('foo="bar=123&name=Magic+Mouse"', {'foo': 'bar=123&name=Magic+Mouse'}),
     ('foo=bar=baz', {'foo': 'bar=baz'}),
     ('a=Zm9vIGJhcg==', {'a': 'Zm9vIGJhcg=='}),
+    ('blah="Foo=2"', {'blah': 'Foo=2'}),
     ('foo=%20%22%2c%3b%2f', {'foo': ' ",;/'}),
     ('foo=%xx', {}),  # Invalid hex code.
     ('foo=%x', {}),  # Invalid hex code.
