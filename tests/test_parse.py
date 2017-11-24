@@ -17,12 +17,17 @@ from biscuits import parse
     ("  f   ;   FOO  =   bar;  ; f ; baz = raz", {'FOO': 'bar', 'baz': 'raz'}),
     ('FOO    =   "bar"   ; baz ="raz"  ', {'FOO': 'bar', 'baz': 'raz'}),
     ('foo="bar=123&name=Magic+Mouse"', {'foo': 'bar=123&name=Magic+Mouse'}),
+    ('foo="   blah   "', {'foo': '   blah   '}),
+    (r'foo="   \"blah\"   "', {'foo': '   "blah"   '}),
     ('foo=bar=baz', {'foo': 'bar=baz'}),
     ('a=Zm9vIGJhcg==', {'a': 'Zm9vIGJhcg=='}),
     ('blah="Foo=2"', {'blah': 'Foo=2'}),
     ('foo=%20%22%2c%3b%2f', {'foo': ' ",;/'}),
     ('foo=%xx', {}),  # Invalid hex code.
     ('foo=%x', {}),  # Invalid hex code.
+    ('foo=', {'foo': ''}),
+    ('foo=bar;', {'foo': 'bar'}),
+    ('foo="?foo', {'foo': '?foo'}),
     ('foo="?foo', {'foo': '?foo'}),
     ("x=!#$&'()*+-./01", {'x': "!#$&'()*+-./01"}),
 ])

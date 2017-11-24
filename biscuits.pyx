@@ -23,7 +23,8 @@ cpdef str unquote(str input):
         str hex
         unsigned int length = len(input)
     while i < length:
-        if input[i] == '%':
+        char = input[i]
+        if char == '%':
             hex = input[i+1:i+3]
             if not len(hex) == 2:
                 # Discard cookies with an invalid value.
@@ -33,8 +34,11 @@ cpdef str unquote(str input):
             except ValueError:
                 return None
             i += 2
+        elif char == "\\" and i+1 < length and input[i+1] == '"':
+            output.append('"')
+            i += 1
         else:
-            output.append(input[i])
+            output.append(char)
         i += 1
     return ''.join(output)
 
@@ -61,11 +65,20 @@ cdef dict cparse(str input):
         unsigned int length = len(input)
         unsigned int i = 0
         unsigned int previous = 0
+        bool is_quoted = False
 
 
     while i < length:
         char = input[i]
-        if char not in (' ', '"', ';', ',', '=') or (key_end and char == '='):
+        if char == '"':
+            if input[previous] != '\\':
+                is_quoted = not is_quoted
+            elif is_quoted:
+                needs_decoding = True
+                previous = i
+            i += 1
+        elif (char not in (' ', ';', ',', '=') or (key_end and char == '=')
+             or is_quoted):
             if char == '%':
                 needs_decoding = True
             previous = i
@@ -75,7 +88,11 @@ cdef dict cparse(str input):
         elif not key_end and char == '=':
             key_end = previous + 1
             i += 1
-            while input[i] in (' ', '"'):
+            while i < length and input[i] in (' ', '"'):
+                if input[i] == '"':
+                    i += 1
+                    is_quoted = True
+                    break
                 i += 1
             value_start = i
         elif char in (';', ','):
@@ -85,7 +102,11 @@ cdef dict cparse(str input):
             key_end = 0
             needs_decoding = False
             i += 1
-            while input[i] in (' ', '"'):
+            while i < length and input[i] in (' ', '"'):
+                if input[i] == '"':
+                    i += 1
+                    is_quoted = True
+                    break
                 i += 1
             key_start = i
         else:
