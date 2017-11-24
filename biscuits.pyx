@@ -7,8 +7,6 @@ from http.cookies import _weekdayname as DAYNAMES
 from http.cookies import _monthname as MONTHNAMES
 from http.cookies import _quote as quote
 
-MAX_LENGTH = 4096
-
 
 cpdef rfc822(d):
     day = DAYNAMES[d.weekday()]
@@ -69,6 +67,9 @@ cdef dict cparse(str input):
 
 
     while i < length:
+        if i >= 4096:
+            key_end = 0  # Abort current parsing and return.
+            break
         char = input[i]
         if char == '"':
             if input[previous] != '\\':
@@ -77,8 +78,8 @@ cdef dict cparse(str input):
                 needs_decoding = True
                 previous = i
             i += 1
-        elif (char not in (' ', ';', ',', '=') or (key_end and char == '=')
-             or is_quoted):
+        elif (is_quoted or char not in (' ', ';', ',', '=')
+              or (key_end and char == '=')):
             if char == '%':
                 needs_decoding = True
             previous = i

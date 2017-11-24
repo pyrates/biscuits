@@ -25,6 +25,8 @@ from biscuits import parse
     ('foo=%20%22%2c%3b%2f', {'foo': ' ",;/'}),
     ('foo=%xx', {}),  # Invalid hex code.
     ('foo=%x', {}),  # Invalid hex code.
+    ('foo=' + 'a'*4092, {'foo': 'a'*4092}),
+    ('foo=' + 'a'*4093, {}),
     ('foo=', {'foo': ''}),
     ('foo=bar;', {'foo': 'bar'}),
     ('foo="?foo', {'foo': '?foo'}),
