@@ -65,7 +65,6 @@ cdef dict cparse(str input):
         unsigned int previous = 0
         bool is_quoted = False
 
-
     while i < length:
         if i >= 4096:
             key_end = 0  # Abort current parsing and return.

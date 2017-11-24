@@ -1,5 +1,5 @@
 compile:
-	cython biscuits.pyx
+	cython -3 biscuits.pyx
 	python setup.py build_ext --inplace
 
 test:
