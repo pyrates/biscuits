@@ -13,7 +13,7 @@ Low level API for handling cookies server side.
 
     # Parse a "Cookie:" header value:
     from biscuits import parse
-    parse('some=value; and=mode')
+    parse('some=value; and=more')
     > {'some': 'value', 'and': 'more'}
 
     # Generate a "Set-Cookie:" header value:

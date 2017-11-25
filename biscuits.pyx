@@ -121,26 +121,6 @@ def parse(str input):
     return cparse(input)
 
 
-
-cdef class Cookies(list):
-
-    def __getitem__(self, name):
-        for cookie in self:
-            if cookie.name == name:
-                return cookie
-        else:
-            raise KeyError(f'No cookie with name "{name}".')
-
-
-    def __delitem__(self, name):
-        for cookie in self:
-            if cookie.name == name:
-                self.remove(cookie)
-                break
-        else:
-            raise KeyError(f'No cookie with name "{name}".')
-
-
 cdef class Cookie:
 
     cdef public:
