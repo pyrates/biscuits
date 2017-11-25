@@ -159,3 +159,6 @@ cdef class Cookie:
         if self.httponly:
             output += f'; HttpOnly'
         return output
+
+    def __repr__(self):
+        return f'<Cookie {self}>'
