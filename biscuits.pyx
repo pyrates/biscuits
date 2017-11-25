@@ -124,7 +124,7 @@ def parse(str input):
 cdef class Cookie:
 
     cdef public:
-        str name
+        str _name
         str value
         str path
         str domain
@@ -135,7 +135,7 @@ cdef class Cookie:
 
     def __init__(self, name, value, path='/', domain=None, secure=False,
                  httponly=False, max_age=0, expires=None):
-        self.name = name
+        self._name = name
         self.value = value
         self.path = path
         self.domain = domain
@@ -144,8 +144,15 @@ cdef class Cookie:
         self.max_age = max_age
         self.expires = expires
 
+    @property
+    def name(self):
+        # Make "name" immutable, to prevent the hash of the instance to change
+        # during its life time.
+        # http://www.asmeurer.com/blog/posts/what-happens-when-you-mess-with-hashing-in-python/
+        return self._name
+
     def __str__(self):
-        cdef str output = f'{self.name}={quote(self.value)}'
+        cdef str output = f'{self._name}={quote(self.value)}'
         if self.expires:
             output += f'; Expires={rfc822(self.expires)}'
         if self.max_age:
@@ -162,3 +169,26 @@ cdef class Cookie:
 
     def __repr__(self):
         return f'<Cookie {self}>'
+
+    def __hash__(self):
+        # Allow to make it unique by its name in a set.
+        return hash(self._name)
+
+    def __eq__(self, other):
+        return hash(self._name) == hash(other)
+
+
+cdef class Cookies(set):
+
+    def __getitem__(self, name):
+        for cookie in self:
+            if hash(cookie) == hash(name):
+                return cookie
+        else:
+            raise KeyError(f'No cookie with name "{name}".')
+
+    def __delitem__(self, name):
+        self.discard(name)
+
+    def set(self, *args, **kwargs):
+        self.add(Cookie(*args, **kwargs))

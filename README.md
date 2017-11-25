@@ -21,6 +21,22 @@ Low level API for handling cookies server side.
     cookie = Cookie(name='foo', value='bar', domain='www.example.org')
     str(cookie)
     > "foo=bar; Domain=www.example.org; Path=/"
+    # Cookie name is immutable
+    cookie.name = 'new_name'  # Will raise an attribute error
+
+    # Cookies collection
+    from biscuits import Cookies, Cookie
+    cookies = Cookies()
+    cookies.add(Cookie('name', 'value', domain='example.org'))
+    # or shortcut:
+    cookies.set('name', 'value', domain='example.org')
+    # Get a cookie from the collection
+    cookies['name']
+    # Delete a cookie from the collection
+    del cookies['name']
+    # Loop over cookies
+    for cookie in cookies:
+        headers.add('Set-Cookie', str(cookie))
 
 
 ## Building from source
