@@ -62,3 +62,9 @@ def test_with_all_attributes():
 def test_value_encoding(value, expected):
     cookie = Cookie('key', value)
     assert str(cookie) == expected
+
+
+def test_cannot_change_name():
+    cookie = Cookie('key', 'value', httponly=True)
+    with pytest.raises(AttributeError):
+        cookie.name = 'immutable'
