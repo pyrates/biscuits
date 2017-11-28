@@ -5,8 +5,7 @@ Low level API for handling cookies server side.
 
 ## Install
 
-    # No Pypi release yet.
-    pip install https://github.com/pyrates/biscuits
+    pip install biscuits
 
 
 ## API
