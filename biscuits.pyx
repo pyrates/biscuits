@@ -18,11 +18,11 @@ cpdef str unquote(str input):
     cdef:
         list output = []
         unsigned int i = 0
-        str hex
+        str hex, current
         unsigned int length = len(input)
     while i < length:
-        char = input[i]
-        if char == '%':
+        current = input[i]
+        if current == '%':
             hex = input[i+1:i+3]
             if not len(hex) == 2:
                 # Discard cookies with an invalid value.
@@ -32,11 +32,11 @@ cpdef str unquote(str input):
             except ValueError:
                 return None
             i += 2
-        elif char == "\\" and i+1 < length and input[i+1] == '"':
-            output.append('"')
+        elif current == '\\' and i+1 < length and input[i+1] in ('"', '\\'):
+            output.append(input[i+1])
             i += 1
         else:
-            output.append(char)
+            output.append(current)
         i += 1
     return ''.join(output)
 
@@ -64,18 +64,24 @@ cdef dict cparse(str input):
         unsigned int i = 0
         unsigned int previous = 0
         bool is_quoted = False
+        unsigned int is_escaped = 0
 
     while i < length:
         if i >= 4096:
             key_end = 0  # Abort current parsing and return.
             break
         char = input[i]
+        if is_escaped and i - is_escaped > 1:  # Reset unconsumed escaping.
+            is_escaped = 0
         if char == '"':
-            if input[previous] != '\\':
+            if not is_escaped:
                 is_quoted = not is_quoted
             elif is_quoted:
-                needs_decoding = True
                 previous = i
+            i += 1
+        elif char == '\\' and not is_escaped:
+            needs_decoding = True
+            is_escaped = i
             i += 1
         elif (is_quoted or char not in (' ', ';', ',', '=')
               or (key_end and char == '=')):

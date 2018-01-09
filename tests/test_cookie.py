@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pytest
-from biscuits import Cookie
+from biscuits import Cookie, parse
 
 FUTURE = datetime(2027, 9, 21, 11, 22)
 
@@ -58,7 +58,12 @@ def test_with_all_attributes():
     ('val=ue', 'key="val=ue"; Path=/'),
     ('val+ue', 'key=val+ue; Path=/'),
     ('val\\ue', 'key="val\\\\ue"; Path=/'),
+    ('\\u00e9', 'key="\\\\u00e9"; Path=/'),  # Starts with \
+    ('val\\', 'key="val\\\\"; Path=/'),  # Ends with \
+    ('\\', 'key="\\\\"; Path=/'),
 ])
 def test_value_encoding(value, expected):
     cookie = Cookie('key', value)
     assert str(cookie) == expected
+    # Make sure we can read a cookie we have just encoded.
+    assert parse(expected)['key'] == value
