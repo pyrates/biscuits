@@ -57,6 +57,10 @@ def test_with_all_attributes():
     ('val ue', 'key="val ue"; Path=/'),
     ('val=ue', 'key="val=ue"; Path=/'),
     ('val+ue', 'key=val+ue; Path=/'),
+    ('val,ue', 'key="val\\054ue"; Path=/'),  # Comma is escaped as octal.
+    ('val;ue', 'key="val\\073ue"; Path=/'),  # Same for semi-colon.
+    ('«value»', 'key="\\253value\\273"; Path=/'),  # Same here.
+    ('value©', 'key="value\\251"; Path=/'),  # Same.
     ('val\\ue', 'key="val\\\\ue"; Path=/'),
     ('\\u00e9', 'key="\\\\u00e9"; Path=/'),  # Starts with \
     ('val\\', 'key="val\\\\"; Path=/'),  # Ends with \
