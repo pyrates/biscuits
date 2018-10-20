@@ -12,6 +12,7 @@ setup(
     version='.'.join(map(str, VERSION)),
     description=__doc__,
     long_description=long_description,
+    long_description_content_type='text/markdown',
     author='Pyrates',
     author_email='yohan.boniface@data.gouv.fr',
     url='https://github.com/pyrates/biscuits',
