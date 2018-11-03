@@ -18,7 +18,7 @@ cpdef str unquote(str input):
     cdef:
         list output = []
         unsigned int i = 0
-        str hex, current
+        str hex, current, next
         unsigned int length = len(input)
     while i < length:
         current = input[i]
@@ -32,9 +32,20 @@ cpdef str unquote(str input):
             except ValueError:
                 return None
             i += 2
-        elif current == '\\' and i+1 < length and input[i+1] in ('"', '\\'):
-            output.append(input[i+1])
-            i += 1
+        elif current == '\\':
+            if i+1 < length:
+                next = input[i+1]
+                if next in ('"', '\\'):
+                    current = next
+                    i += 1
+                elif next in ('0', '1', '2', '3'):  # Octal escaped char.
+                    next = input[i+1:i+4]
+                    i += 3
+                    try:
+                        current = chr(int(next, 8))
+                    except ValueError:
+                        return None
+            output.append(current)
         else:
             output.append(current)
         i += 1
