@@ -38,3 +38,11 @@ Low level API for handling cookies server side.
 
 See [Benchmark](https://github.com/pyrates/biscuits/wiki/Benchmark) for more
 details.
+
+
+## Changelog
+
+### 0.2
+
+- unescape antislash when parsing to be consistent with quoting (cf #3)
+- unescape octal ascii when parsing to be consistent with quoting (cf #4)
