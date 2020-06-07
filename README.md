@@ -46,3 +46,7 @@ details.
 
 - unescape antislash when parsing to be consistent with quoting (cf #3)
 - unescape octal ascii when parsing to be consistent with quoting (cf #4)
+
+### 0.3
+
+- add support for the SameSite attribute (cf #8)
