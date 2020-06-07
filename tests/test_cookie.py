@@ -43,13 +43,18 @@ def test_can_set_httponly():
     cookie = Cookie('key', 'value', httponly=True)
     assert str(cookie) == 'key=value; Path=/; HttpOnly'
 
+def test_can_set_samesite():
+    cookie = Cookie('key', 'value', samesite="Strict")
+    assert str(cookie) == 'key=value; Path=/; SameSite=Strict'
+
 
 def test_with_all_attributes():
     cookie = Cookie('key', 'value', expires=FUTURE, path='/bar',
-                    domain='baz.org', max_age=800, secure=True, httponly=True)
+                    domain='baz.org', max_age=800, secure=True, httponly=True,
+                    samesite='Strict')
     assert str(cookie) == ('key=value; Expires=Tue, 21 Sep 2027 11:22:00 GMT; '
                            'Max-Age=800; Domain=baz.org; Path=/bar; Secure; '
-                           'HttpOnly')
+                           'HttpOnly; SameSite=Strict')
 
 
 @pytest.mark.parametrize('value,expected', [
