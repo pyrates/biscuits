@@ -2,7 +2,7 @@ compile:
 	cython -3 biscuits.pyx
 	python setup.py build_ext --inplace
 develop:
-	python setup.py develop
+	pip install -e .
 test:
 	py.test -v
 
