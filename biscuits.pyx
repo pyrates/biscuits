@@ -145,13 +145,14 @@ cdef class Cookie:
         str value
         str path
         str domain
+        str samesite
         bool secure
         bool httponly
         unsigned int max_age
         datetime expires
 
     def __init__(self, name, value, path='/', domain=None, secure=False,
-                 httponly=False, max_age=0, expires=None):
+                 httponly=False, max_age=0, expires=None, samesite=None):
         self.name = name
         self.value = value
         self.path = path
@@ -160,6 +161,7 @@ cdef class Cookie:
         self.httponly = httponly
         self.max_age = max_age
         self.expires = expires
+        self.samesite = samesite
 
     def __str__(self):
         cdef str output = f'{self.name}={quote(self.value)}'
@@ -175,6 +177,8 @@ cdef class Cookie:
             output += f'; Secure'
         if self.httponly:
             output += f'; HttpOnly'
+        if self.samesite:
+            output += f'; SameSite={self.samesite}'
         return output
 
     def __repr__(self):
